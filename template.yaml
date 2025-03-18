@@ -1,23 +1,23 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Static build of FFmpeg/FFprobe for Amazon Linux 2
+  Static build of FFmpeg/FFprobe for Amazon Linux 2023
 
-  Check out https://github.com/serverlesspub/ffmpeg-aws-lambda-layer
-  for more information.
+  Repository: https://github.com/nulib/ffmpeg-aws-lambda-layer
+
+  Forked from https://github.com/serverlesspub/ffmpeg-aws-lambda-layer
+Parameters:
+  OutputName:
+    Type: String
+    Description: CloudFormation Output Name
+    Default: FFMpegLayer
 Resources:
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: ffmpeg 
-      Description: FFMPEG for AWS Lambda
+      Description: FFMPEG for AWS Amazon Linux 2023 Lambda Runtimes
       ContentUri: build/layer
-      CompatibleRuntimes:
-        - nodejs10.x
-        - python3.6
-        - ruby2.5
-        - java8
-        - go1.x
       LicenseInfo: GPL-2.0-or-later
       RetentionPolicy: Retain
 
@@ -25,18 +25,20 @@ Outputs:
   LayerVersion:
     Description: Layer ARN Reference
     Value: !Ref LambdaLayer
+    Export:
+      Name: !Ref OutputName
 
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: ffmpeg-lambda-layer
     Description: >
-      Static build of FFmpeg/FFprobe for Amazon Linux 2,
-      packaged as a Lambda layer. Bundles FFmpeg 4.1.3
-    Author: Gojko Adzic
+      Static build of FFmpeg/FFprobe for Amazon Linux 2023,
+      packaged as a Lambda layer. Bundles FFmpeg 7.1.
+    Author: Michael B. Klein (based on work by Gojko Adzic)
     SpdxLicenseId: GPL-2.0-or-later
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README-SAR.md 
     Labels: ['layer', 'lambda', 'ffmpeg', 'ffprobe']
-    HomePageUrl: https://github.com/serverlesspub/ffmpeg-aws-lambda-layer
+    HomePageUrl: https://github.com/nulib/ffmpeg-aws-lambda-layer
     SemanticVersion: 1.0.0
-    SourceCodeUrl: https://github.com/serverlesspub/ffmpeg-aws-lambda-layer
+    SourceCodeUrl: https://github.com/nulib/ffmpeg-aws-lambda-layer

@@ -1,6 +1,6 @@
 # FFmpeg/FFprobe for AWS Lambda
 
-A Lambda layer containing a static version of FFmpeg/FFprobe utilities from the [`FFmpeg`](https://www.ffmpeg.org/) Linux package, compatible with Amazon Linux 2.x and Amazon Linux 1.x instances (including the `nodejs10.x` runtime, and the updated 2018.03 Amazon Linux 1 runtimes). 
+A Lambda layer containing a static version of FFmpeg/FFprobe utilities from the [`FFmpeg`](https://www.ffmpeg.org/) Linux package, compatible with [Amazon Linux 2023 runtimes](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html).
 
 ## Usage
 
@@ -19,7 +19,7 @@ For manual deployments and custom builds, read below...
 
 ## Deploying to AWS as a layer
 
-This package includes FFmpeg 4.1.3, packaged by John Van Sickle. Please consider supporting him for maintaining statically built FFmpeg packages. For more information, check out <https://johnvansickle.com/ffmpeg/>
+This package will create a static build of FFmpeg 7.1 from source with a number of free (GPL-compatible) codecs.
 
 The output will be in the `result` dir.
 
@@ -32,14 +32,6 @@ make deploy DEPLOYMENT_BUCKET=<YOUR BUCKET NAME>
 ### configuring the deployment
 
 By default, this uses `ffmpeg-lambda-layer` as the stack name. Provide a `STACK_NAME` variable when calling `make deploy` to use an alternative name.
-
-### example usage
-
-An example project is in the [example](example) directory. It sets up two buckets, and listens to file uploads on the first bucket to convert and generate thumbnails from uploaded video files. You can deploy it from the root Makefile using:
-
-```
-make deploy-example DEPLOYMENT_BUCKET=<YOUR BUCKET NAME>
-```
 
 For more information on using FFmpeg and FFprobe, check out <https://ffmpeg.org/documentation.html>
 

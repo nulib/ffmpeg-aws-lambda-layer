@@ -1,21 +1,36 @@
 STACK_NAME ?= ffmpeg-lambda-layer
 
-clean: 
+clean:
+	rm -rf .aws-sam
+
+distclean: clean
 	rm -rf build
 
-build/layer/bin/ffmpeg: 
-	mkdir -p build/layer/bin
-	rm -rf build/ffmpeg*
-	cd build && curl https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | tar x
-	mv build/ffmpeg*/ffmpeg build/ffmpeg*/ffprobe build/layer/bin
+docker-image:
+	@if [ -z "$(shell docker images -q nulib/ffmpeg-lambda:latest)" ]; then \
+		echo "Docker image not found. Building image..."; \
+		docker build -t nulib/ffmpeg-lambda:latest .; \
+	else \
+		echo "Docker image already exists."; \
+	fi
 
-build/output.yaml: template.yaml build/layer/bin/ffmpeg
-	aws cloudformation package --template $< --s3-bucket $(DEPLOYMENT_BUCKET) --output-template-file $@
+build/layer/bin/ffmpeg: docker-image
+	mkdir -p build/layer/bin ;\
+	docker run --rm -t --user $$(id -u):$$(id -g) -v $$PWD/build/layer/bin:/output nulib/ffmpeg-lambda:latest
+	
+.aws-sam/build/template.yaml: build/layer/bin/ffmpeg
+	sam build
 
-deploy: build/output.yaml
-	aws cloudformation deploy --template $< --stack-name $(STACK_NAME)
-	aws cloudformation describe-stacks --stack-name $(STACK_NAME) --query Stacks[].Outputs --output table
+build/output.yaml: .aws-sam/build/template.yaml
+	sam package --output-template-file build/output.yaml --resolve-s3
 
-deploy-example:
-	cd example && \
-		make deploy DEPLOYMENT_BUCKET=$(DEPLOYMENT_BUCKET) LAYER_STACK_NAME=$(STACK_NAME)
+build: .aws-sam/build/template.yaml
+
+package: build/output.yaml
+
+deploy: .aws-sam/build/template.yaml
+	sam deploy --template-file .aws-sam/build/template.yaml --resolve-s3 --stack-name $(STACK_NAME)
+
+publish: build/output.yaml
+	sam publish --template build/output.yaml
+
